@@ -9,7 +9,7 @@
 int main()
 {
     int i=0;
-    char c;
+    char c=' ';
     char ch;
 
     printf("202007061 백종빈\n");
@@ -18,21 +18,23 @@ int main()
     while (1) {
 
         ch = _getch();
-
         printf("%c", ch);
+//        printf("\ni 값: %d", i);
+
+        i++;
+
+//        printf("\ni 값: %d", i);
 
         if (ESC == ch) {
+            i = 0;
             return 0;
         }
 
-
         if (ch == 'q' || ch == 'w' || ch == 'e' || ch == 'r') {
-
             c = ch;
-            i++;
         }
             
-        if (CR == ch && i == 1) {
+        if (CR == ch && i == 2) {
 
             switch (c) {
             case 'q':
@@ -52,7 +54,7 @@ int main()
             }
 
             printf("\ncommand>");
-//              printf("\ni 값: %d", i);
+//            printf("\ni 값: %d", i);
             i = 0;
         }
         else if (CR == ch) {
