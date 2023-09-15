@@ -4,43 +4,64 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 #define ESC 27
+#define CR 13
 
 int main()
 {
-    char a;
+    int i=0;
+    char c;
     char ch;
 
     printf("202007061 백종빈\n");
-    
+    printf("command>");
+
     while (1) {
 
         ch = _getch();
-        if (ESC == ch)
+
+        printf("%c", ch);
+
+        if (ESC == ch) {
             return 0;
-
-        printf("command>");
-        scanf_s(" %c", &a, 1);
-
-        switch (a) {
-        case 'q':
-            printf("qqqqqq\n");
-            break;
-        case 'w':
-            printf("과제 너무 wㅗㅎ다\n");
-            break;
-        case 'e':
-            printf("과제 너무 좋ㄷe\n");
-            break;
-        case 'r':
-            printf("과제 너무 좋ㄷr\n");
-            break;
-        default:
-            break;
         }
 
 
+        if (ch == 'q' || ch == 'w' || ch == 'e' || ch == 'r') {
+
+            c = ch;
+            i++;
+        }
+            
+        if (CR == ch && i == 1) {
+
+            switch (c) {
+            case 'q':
+                printf("\nqqqqqq");
+                break;
+            case 'w':
+                printf("\n과제 너무 wㅗㅎ다");
+                break;
+            case 'e':
+                printf("\n과제 너무 좋ㄷe");
+                break;
+            case 'r':
+                printf("\n과제 너무 좋ㄷr");
+                break;
+            default:
+                break;
+            }
+
+            printf("\ncommand>");
+//              printf("\ni 값: %d", i);
+            i = 0;
+        }
+        else if (CR == ch) {
+            printf("\ncommand>");
+//            printf("\ni 값: %d", i);
+            i = 0;
+        }
+
     }
 
-    
 }
 
