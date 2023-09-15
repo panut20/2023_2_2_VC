@@ -26,7 +26,6 @@ int main()
 //        printf("\ni 값: %d", i);
 
         if (ESC == ch) {
-            i = 0;
             return 0;
         }
 
@@ -50,17 +49,21 @@ int main()
                 printf("\n과제 너무 좋ㄷr");
                 break;
             default:
+                printf("\n다시 입력해주세요.");
                 break;
             }
 
             printf("\ncommand>");
 //            printf("\ni 값: %d", i);
             i = 0;
+            c = ' ';
         }
         else if (CR == ch) {
+            printf("\n다시 입력해주세요.");
             printf("\ncommand>");
 //            printf("\ni 값: %d", i);
             i = 0;
+            c = ' ';
         }
 
     }
