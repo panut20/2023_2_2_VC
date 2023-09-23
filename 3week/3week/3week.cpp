@@ -22,6 +22,9 @@ int main()
 
     char ch= ' ';
 
+    printf("↑+ a + s = 아따따뚜겐~\n");
+    printf("→+→ = 앞대쉬\n");
+    printf("←+← = 백대쉬\n");
 
     while (ch != ESC) {
         
@@ -47,20 +50,29 @@ int main()
             }
 
             if (ch == DOWN) {
-                ch = _getch();
-                printf("22222");
+
             }
             if (ch == LEFT) {
                 ch = _getch();
-                printf("333333");
+                ch = _getch();
+                std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
+                if (ch == LEFT && sec.count() <= 0.3) {
+                    printf("백대쉬\n");
+                }
             }
+
             if (ch == RIGHT) {
                 ch = _getch();
-                printf("4444444");
+                ch = _getch();
+                std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
+                if (ch == RIGHT && sec.count() <= 0.3) {
+                    printf("앞대쉬\n");
+                }
+                
             }
         }
         if (ch == 'a') {
-            printf("asdd");
+            printf("asdd\n");
         }
 
     }
