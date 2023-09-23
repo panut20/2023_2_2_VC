@@ -1,20 +1,65 @@
-﻿// 3week.cpp : 이 파일에는 'main' 함수가 포함됩니다. 거기서 프로그램 실행이 시작되고 종료됩니다.
-//
+﻿#include <iostream>
+#include<stdio.h>
+#include<conio.h>
+#include <chrono>
 
-#include <iostream>
+#define ESC 27
+#define UP 72
+#define DOWN 80
+#define LEFT 75
+#define RIGHT 77
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    /*
+    std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+    int sum = 0;
+    for (int i = 0; i < 999999999; i++)
+        sum += i;
+    std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
+    std::cout << "for문을 돌리는데 걸리는 시간(초) : " << sec.count() << "seconds" << std::endl;
+    */
+
+    char ch= ' ';
+
+
+    while (ch != ESC) {
+        
+        
+        ch = _getch();
+//      printf("%c", ch);
+
+//      char는 1바이트, 방향키는 아스키 코드가 2개있는 특수기호. (224, ~~~) 즉, 224를 char자료형에 받으면 1 1 1 0 0 0 0 0 라는 비트가 저장되고,
+//      char는 signed라서 2의 보수체계에 따라 저장된 비트를 해석. 즉 -32가 됨. (오버플로우의 영향)
+        if (ch == -32) {
+            ch = _getch();
+            if (ch == UP) {
+                ch = _getch();
+                if (ch == 'a') {
+                    ch = _getch();
+                    if (ch == 's') {
+                        printf("aaaaaaaaaaaa");
+                    }
+                }
+
+            }
+            if (ch == DOWN) {
+                ch = _getch();
+                printf("22222");
+            }
+            if (ch == LEFT) {
+                ch = _getch();
+                printf("333333");
+            }
+            if (ch == RIGHT) {
+                ch = _getch();
+                printf("4444444");
+            }
+        }
+        if (ch == 'a') {
+            printf("asdd");
+        }
+
+    }
+
 }
-
-// 프로그램 실행: <Ctrl+F5> 또는 [디버그] > [디버깅하지 않고 시작] 메뉴
-// 프로그램 디버그: <F5> 키 또는 [디버그] > [디버깅 시작] 메뉴
-
-// 시작을 위한 팁: 
-//   1. [솔루션 탐색기] 창을 사용하여 파일을 추가/관리합니다.
-//   2. [팀 탐색기] 창을 사용하여 소스 제어에 연결합니다.
-//   3. [출력] 창을 사용하여 빌드 출력 및 기타 메시지를 확인합니다.
-//   4. [오류 목록] 창을 사용하여 오류를 봅니다.
-//   5. [프로젝트] > [새 항목 추가]로 이동하여 새 코드 파일을 만들거나, [프로젝트] > [기존 항목 추가]로 이동하여 기존 코드 파일을 프로젝트에 추가합니다.
-//   6. 나중에 이 프로젝트를 다시 열려면 [파일] > [열기] > [프로젝트]로 이동하고 .sln 파일을 선택합니다.
