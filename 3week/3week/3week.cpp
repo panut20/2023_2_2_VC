@@ -9,8 +9,9 @@
 #define LEFT 75
 #define RIGHT 77
 
-void arrow(char ch);
-void ehqkf(char ch);
+void arrow(char ch); // 화살표로 시작하는 커맨드 모은 함수
+void ehqkf(char ch); // 도발 커맨드 함수
+void flying(char ch); // 어퍼컷 커맨드 함수
 
 int main()
 {
@@ -18,6 +19,7 @@ int main()
     char ch = ' ';
 
     printf("↑+ a + s = 아따따뚜겐~\n");
+    printf("a + ↑ + a = 어퍼컷\n");
     printf("→+→ = 앞대쉬\n");
     printf("←+← = 백대쉬\n");
     printf("도발\n");
@@ -34,7 +36,9 @@ int main()
             ehqkf(ch);
         }
 
-
+        if (ch == 'a') {
+            flying(ch);
+        }
     }
 }
 
@@ -98,3 +102,21 @@ int main()
         }
     }
 
+    void flying(char ch) {
+
+        std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+
+        if (ch == 'a') {
+            ch = _getch();
+            if (ch == -32) {
+                ch = _getch();
+                if (ch == UP) {
+                    ch = _getch();
+                    std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
+                    if (ch == 'a' && sec.count() <= 0.3) {
+                        printf("어퍼컷\n");
+                    }
+                }
+            }
+        }
+    }
