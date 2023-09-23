@@ -9,10 +9,13 @@
 #define LEFT 75
 #define RIGHT 77
 
+void arrow(char ch);
+void ehqkf(char ch);
+
 int main()
 {
 
-    char ch= ' ';
+    char ch = ' ';
 
     printf("↑+ a + s = 아따따뚜겐~\n");
     printf("→+→ = 앞대쉬\n");
@@ -20,12 +23,26 @@ int main()
     printf("도발\n");
 
     while (ch != ESC) {
-        
-        ch = _getch();
-        std::chrono::system_clock::time_point start = std::chrono::system_clock::now(); // 입력과 동시에 시간 체크
 
-//      char는 1바이트, 방향키는 아스키 코드가 2개있는 특수기호. (224, ~~~) 즉, 224를 char자료형에 받으면 1 1 1 0 0 0 0 0 라는 비트가 저장되고,
-//      char는 signed라서 2의 보수체계에 따라 저장된 비트를 해석. 즉 -32가 됨. (오버플로우의 영향)
+        ch = _getch();
+
+        if (ch == -32) {
+            arrow(ch);
+        }
+
+        if (ch == 'e') {
+            ehqkf(ch);
+        }
+
+
+    }
+}
+
+
+    void arrow(char ch) {
+
+        std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+
         if (ch == -32) {
             ch = _getch();
             if (ch == UP) {
@@ -57,7 +74,11 @@ int main()
                 }
             }
         }
+    }
 
+    void ehqkf(char ch) {
+
+        std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
 
         if (ch == 'e') {
             ch = _getch();
@@ -75,7 +96,5 @@ int main()
                 }
             }
         }
-
     }
 
-}
