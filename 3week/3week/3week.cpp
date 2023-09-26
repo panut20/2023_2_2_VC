@@ -18,6 +18,7 @@ int main()
 
     char ch = ' ';
 
+
     printf("↑+ a + s = 아따따뚜겐~\n");
     printf("a + ↑ + a = 어퍼컷\n");
     printf("→+→ = 앞대쉬\n");
@@ -33,7 +34,7 @@ int main()
         }
 
         if (ch == 'e') {
-            ehqkf(ch);
+            ehqkf(ch); 
         }
 
         if (ch == 'a') {
@@ -50,19 +51,24 @@ int main()
         if (ch == -32) {
             ch = _getch();
             if (ch == UP) {
+                printf("↑");
                 ch = _getch();
                 if (ch == 'a') {
+                    printf("a");
                     ch = _getch();
                     std::chrono::duration<double>sec = std::chrono::system_clock::now() - start; // 완성 직전에 시간체크 및 0.3초 체크
                     if (ch == 's' && sec.count() <= 0.3) {
+                        printf("s\n");
                         printf("아따따뚜겐~\n");
                     }
                 }
             }
 
             if (ch == LEFT) {
+                printf("→");
                 ch = _getch();
                 ch = _getch();
+                printf("→");
                 std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
                 if (ch == LEFT && sec.count() <= 0.3) {
                     printf("백대쉬\n");
