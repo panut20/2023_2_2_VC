@@ -71,7 +71,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
 	MSG msg;
 	ZeroMemory(&msg, sizeof(msg));
 
-	while (msg.message != WM_QUIT)
+	while (msg.message != WM_QUIT)	// 메시지 루프 (모든 이벤트를 계속 꺼내봄)
 	{
 		// 메시지 처리.
 		if (GetMessage(&msg, hwnd, 0, 0))
@@ -79,7 +79,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
 		{
 			// 메시지 해석해줘.
 			TranslateMessage(&msg);
-			// 메시지를 처리해야할 곳에 전달해줘.
+			// 메시지를 처리해야할 곳에 전달해줘. --> winproc 에서 실행.
 			DispatchMessage(&msg);
 		}
 		else
