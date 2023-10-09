@@ -9,6 +9,9 @@
 POINT startPoint = { 0 };
 POINT endPoint = { 0 };
 int isMouseLButtonPressed = 0;
+int isMouseRButtonPressed = 0;
+RECT rect = { 0 }; // 현재 그려진 사각형의 위치와 크기를 저장합니다.
+RECT savedRect = { 0 }; // 이동하기 전의 사각형의 위치와 크기를 저장합니다.
 
 // 윈도우의 이벤트를 처리하는 콜백(Callback) 함수.
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -17,6 +20,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_LBUTTONDOWN:
 	{
+		HDC hdc = GetDC(hwnd);
+
+		// 기존에 그려진 사각형을 지우기 위해 화면을 흰색으로 칠함.
+		RECT clientRect;
+		GetClientRect(hwnd, &clientRect);
+		FillRect(hdc, &clientRect, (HBRUSH)(COLOR_WINDOW + 1));
+
 		///** 사각형 그리기
 		//*/
 		//HDC hdc = GetDC(hwnd);
@@ -32,6 +42,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		//// 그리기
 		//FillRect(hdc, &rect, hBrush); // 사각형을 빨간색으로 채우기
 		//ReleaseDC(hwnd, hdc);
+
 		startPoint.x = LOWORD(lParam);
 		startPoint.y = HIWORD(lParam);
 		isMouseLButtonPressed = 1;
@@ -47,7 +58,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			endPoint.x = LOWORD(lParam);
 			endPoint.y = HIWORD(lParam);
 
-			// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
+			// WM_PAINT 메시지를 유발하여 사각형을 화면에 그립니다.
 			InvalidateRect(hwnd, NULL, TRUE);
 		}
 	}
@@ -55,23 +66,40 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_LBUTTONUP:
 	{
-		///** 사각형 그리기
-		//*/
-		//HDC hdc = GetDC(hwnd);
-		//RECT rect = { 50, 50, 150, 150 }; // 왼쪽 상단 좌표 (50, 50)에서 오른쪽 하단 좌표 (150, 150)까지의 사각형
-		//
-
-		//// 그리기
-		//FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW+1)); // 사각형을 빨간색으로 채우기
-		//ReleaseDC(hwnd, hdc);
 		endPoint.x = LOWORD(lParam);
 		endPoint.y = HIWORD(lParam);
 
 		isMouseLButtonPressed = 0;
 
-		// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
+		// WM_PAINT 메시지를 유발하여 네모를 화면에 그림.
 		InvalidateRect(hwnd, NULL, TRUE);
+
+		// 추가된 부분: 그림을 그리는 코드
+		HDC hdc = GetDC(hwnd);
+		RECT rect = { startPoint.x, startPoint.y, endPoint.x, endPoint.y };
+		HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255)); // 핑크 브러시 생성
+
+		if (hBrush == NULL)
+		{
+			MessageBox(NULL, L"CreateSolidBrush failed!", L"Error", MB_ICONERROR);
+			exit(-1);
+		}
+
+		FillRect(hdc, &rect, hBrush);
+		ReleaseDC(hwnd, hdc);
 	}
+
+	case WM_RBUTTONDOWN:
+	{
+
+	}
+	break;
+
+	case WM_RBUTTONUP:
+	{
+
+	}
+	break;
 
 	case WM_PAINT:
 	{
@@ -79,45 +107,15 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if (isMouseLButtonPressed)
 		{
-			RECT rect;
-			GetClientRect(hwnd, &rect);
+			RECT rect = { min(startPoint.x, endPoint.x), min(startPoint.y, endPoint.y), max(startPoint.x, endPoint.x), max(startPoint.y, endPoint.y) };
 			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
-
-			MoveToEx(hdc, startPoint.x, startPoint.y, NULL);
-			LineTo(hdc, endPoint.x, endPoint.y);
 		}
 
 		ReleaseDC(hwnd, hdc);
 
-		/** 사각형 그리기
-		*/
-		//HDC hdc = GetDC(hwnd);
-		//RECT rect = { 50, 50, 150, 150 }; // 왼쪽 상단 좌표 (50, 50)에서 오른쪽 하단 좌표 (150, 150)까지의 사각형
-		//HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255)); // 핑크 브러시 생성
-
-
-		//// 그리기
-		//FillRect(hdc, &rect, hBrush); // 사각형을 빨간색으로 채우기
-		//ReleaseDC(hwnd, hdc);
-
-
-		/** 타원 그리기
-		*/
-		//HDC hdc = GetDC(hwnd); // 디바이스 컨텍스트 얻기
-		//
-		//HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255)); // 핑크 브러시 생성
-		//SelectObject(hdc, hBrush);
-
-		//// 타원 그리기
-		//Ellipse(hdc, 50, 50, 200, 150); // 왼쪽 상단 좌표 (50, 50)에서 오른쪽 하단 좌표 (200, 150)까지의 타원
-
-		//DeleteObject(hBrush);
-
-		//ReleaseDC(hwnd, hdc); // 디바이스 컨텍스트 해제
-
-
 	}
 	break;
+
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
@@ -153,7 +151,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	}
 
 	// Window viewport 영역 조정
-	RECT rect = { 150, 100, 800, 600 };
+	RECT rect = { 0, 0, 800, 600 };
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, 0);
 	int width = rect.right - rect.left;
 	int height = rect.bottom - rect.top;
@@ -161,9 +159,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	// 윈도우 생성
 	HWND hwnd = CreateWindow(
 		wc.lpszClassName,
-		TEXT("컴소 Application"),
-		WS_OVERLAPPEDWINDOW,
-		0, 0,
+		TEXT("202007061 백종빈"),
+		WS_OVERLAPPEDWINDOW & ~WS_THICKFRAME,	// 창의 크기를 변경할 수 있는 테두리 삭제
+		CW_USEDEFAULT, CW_USEDEFAULT,
 		width, height,
 		NULL, NULL,
 		hInstance,
