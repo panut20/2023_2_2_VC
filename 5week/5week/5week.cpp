@@ -5,6 +5,7 @@
 #endif
 
 #include <windows.h>
+#include<stdio.h>
 
 POINT startPoint = { 0 };
 POINT endPoint = { 0 };
@@ -90,6 +91,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		// 마우스 우클릭 드래그로 이동할 때, 현재 사각형의 위치를 저장합니다.
 		savedRect = rect;
+
 	}
 	break;
 
@@ -107,8 +109,18 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		rect.top = savedRect.top + deltaY;
 		rect.bottom = savedRect.bottom + deltaY;
 
-		// WM_PAINT 메시지를 유발하여 사각형을 화면에 그립니다.
-		InvalidateRect(hwnd, NULL, TRUE);
+		HDC hdc = GetDC(hwnd);
+		rect = { rect.left, rect.top, rect.right, rect.bottom };
+		HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255)); // 핑크 브러시 생성
+
+		if (hBrush == NULL)
+		{
+			MessageBox(NULL, L"CreateSolidBrush failed!", L"Error", MB_ICONERROR);
+			exit(-1);
+		}
+
+		FillRect(hdc, &rect, hBrush);
+		ReleaseDC(hwnd, hdc);
 	}
 	break;
 
