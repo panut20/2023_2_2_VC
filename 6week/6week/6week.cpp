@@ -9,6 +9,7 @@
 POINT startPoint = { 0 };
 POINT endPoint = { 0 };
 int isKeyPressed = 0;
+RECT rect;
 
 RECT rect_user = { 5, 5, 10, 10 }; // 왼쪽 상단 좌표 (5, 5)에서 오른쪽 하단 좌표 (10, 10)까지의 사각형	left, top, right ,bottom
 RECT rect_target = { 50, 50, 150, 150 }; // 왼쪽 상단 좌표 (50, 50)에서 오른쪽 하단 좌표 (150, 150)까지의 사각형
@@ -17,7 +18,7 @@ RECT rect_target = { 50, 50, 150, 150 }; // 왼쪽 상단 좌표 (50, 50)에서 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc = GetDC(hwnd);
-
+	
 	HBRUSH hBrush_user = CreateSolidBrush(RGB(0, 0, 255));
 	HBRUSH hBrush_target = CreateSolidBrush(RGB(255, 0, 255));
 	HBRUSH hBrush_eraser = CreateSolidBrush(RGB(255, 255, 255));
@@ -47,8 +48,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		if (wParam == VK_DOWN)
 		{
-			rect_user.bottom += 5;
 			rect_user.top += 5;
+			rect_user.bottom += 5;
 			InvalidateRect(hwnd, NULL, TRUE);
 		}
 		break;
@@ -58,15 +59,21 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT:
 	{
+		if (IntersectRect(&rect, &rect_user, &rect_target))
+		{
+			TextOut(hdc, 10, 10, text, lstrlen(text));
+			FillRect(hdc, &rect_user, hBrush_user);
+			FillRect(hdc, &rect_target, hBrush_target);
+		}
+
 		if (isKeyPressed)
 		{
 			FillRect(hdc, &rect_user, hBrush_user);
 			FillRect(hdc, &rect_target, hBrush_target);
-			//			TextOut(hdc, 10, 10, text, lstrlen(text));
-
 		}
 		else
 		{
+			// TextOut(hdc, 10, 10, text, lstrlen(text));
 			FillRect(hdc, &rect_user, hBrush_eraser);
 			FillRect(hdc, &rect_target, hBrush_target);
 		}
