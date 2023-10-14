@@ -5,13 +5,15 @@
 //#endif
 
 #include <windows.h>
+#define ID_TIMER 1
 
 POINT startPoint = { 0 };
 POINT endPoint = { 0 };
 int isKeyPressed = 0;
+int moveSpeed = 1; // 작은 네모의 이동 속도
 RECT rect;
 
-RECT rect_user = { 5, 5, 15, 15 }; // 왼쪽 상단 좌표 (5, 5)에서 오른쪽 하단 좌표 (10, 10)까지의 사각형	left, top, right ,bottom
+RECT rect_user = { 5, 5, 15, 15 }; // 왼쪽 상단 좌표 (5, 5)에서 오른쪽 하단 좌표 (15, 15)까지의 사각형	left, top, right ,bottom
 RECT rect_target = { 50, 50, 150, 150 }; // 왼쪽 상단 좌표 (50, 50)에서 오른쪽 하단 좌표 (150, 150)까지의 사각형
 
 // 윈도우의 이벤트를 처리하는 콜백(Callback) 함수.
@@ -26,6 +28,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	switch (uMsg)
 	{
+	case WM_CREATE:
+		SetTimer(hwnd, ID_TIMER, 16, NULL); // 타이머 시작 (약 60fps)
+		break;
+
 	case WM_KEYDOWN:
 		isKeyPressed = 1;
 
@@ -89,6 +95,33 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 
+	case WM_TIMER:
+		if (isKeyPressed) {
+			if (wParam == ID_TIMER) {
+				if (GetAsyncKeyState(VK_RIGHT) & 0x8000) {		// GetAsyncKeyState 함수를 사용하여 특정 키가 눌려 있는지 확인하고, 눌려 있다면 해당 방향으로 작은 네모를 이동시킵니다.
+																// GetAsyncKeyState(VK_RIGHT)는 오른쪽 화살표 키의 현재 상태를 반환합니다. 반환값은 16비트 숫자로, 비트 15에서는 키가 현재 눌려있는지 여부를 나타냅니다. 즉, 비트 15가 1이면 키가 눌려져 있는 상태입니다.
+																// &0x8000은 비트 연산을 통해 비트 15만을 확인하는 것입니다. 0x8000은 16진수로 15번째 비트가 1인 값을 나타냅니다.
+					rect_user.left += moveSpeed; // 오른쪽으로 이동
+					rect_user.right += moveSpeed;
+				}
+				if (GetAsyncKeyState(VK_LEFT) & 0x8000) {
+					rect_user.left -= moveSpeed; // 왼쪽으로 이동
+					rect_user.right -= moveSpeed;
+				}
+				if (GetAsyncKeyState(VK_UP) & 0x8000) {
+					rect_user.top -= moveSpeed; // 위로 이동
+					rect_user.bottom -= moveSpeed;
+				}
+				if (GetAsyncKeyState(VK_DOWN) & 0x8000) {
+					rect_user.top += moveSpeed; // 아래로 이동
+					rect_user.bottom += moveSpeed;
+				}
+
+				InvalidateRect(hwnd, NULL, TRUE);
+			}
+		}
+		break;
+
 	case WM_CLOSE:
 		DestroyWindow(hwnd);
 		break;
@@ -142,7 +175,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	HWND hwnd = CreateWindow(
 		wc.lpszClassName,
 		TEXT("202007061 백종빈"),
-		WS_OVERLAPPEDWINDOW,
+		WS_OVERLAPPEDWINDOW, 
 		0, 0,
 		width, height,
 		NULL, NULL,
