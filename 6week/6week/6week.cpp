@@ -11,7 +11,7 @@ POINT endPoint = { 0 };
 int isKeyPressed = 0;
 RECT rect;
 
-RECT rect_user = { 5, 5, 10, 10 }; // 왼쪽 상단 좌표 (5, 5)에서 오른쪽 하단 좌표 (10, 10)까지의 사각형	left, top, right ,bottom
+RECT rect_user = { 5, 5, 15, 15 }; // 왼쪽 상단 좌표 (5, 5)에서 오른쪽 하단 좌표 (10, 10)까지의 사각형	left, top, right ,bottom
 RECT rect_target = { 50, 50, 150, 150 }; // 왼쪽 상단 좌표 (50, 50)에서 오른쪽 하단 좌표 (150, 150)까지의 사각형
 
 // 윈도우의 이벤트를 처리하는 콜백(Callback) 함수.
@@ -28,6 +28,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_KEYDOWN:
 		isKeyPressed = 1;
+
 		if (wParam == VK_RIGHT)
 		{
 			rect_user.left += 5;
@@ -52,34 +53,42 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			rect_user.bottom += 5;
 			InvalidateRect(hwnd, NULL, TRUE);
 		}
+
 		break;
 
 	case WM_KEYUP:
 		isKeyPressed = 0;
 		break;
+
 	case WM_PAINT:
 	{
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hwnd, &ps);
+
+		// 배경을 흰색으로 지웁니다.
+		FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+
 		if (IntersectRect(&rect, &rect_user, &rect_target))
 		{
 			TextOut(hdc, 10, 10, text, lstrlen(text));
-			FillRect(hdc, &rect_user, hBrush_user);
 			FillRect(hdc, &rect_target, hBrush_target);
+			FillRect(hdc, &rect_user, hBrush_user);
 		}
 
 		if (isKeyPressed)
 		{
-			FillRect(hdc, &rect_user, hBrush_user);
 			FillRect(hdc, &rect_target, hBrush_target);
+			FillRect(hdc, &rect_user, hBrush_user);
 		}
 		else
 		{
-			// TextOut(hdc, 10, 10, text, lstrlen(text));
-			FillRect(hdc, &rect_user, hBrush_eraser);
 			FillRect(hdc, &rect_target, hBrush_target);
+			FillRect(hdc, &rect_user, hBrush_user);
 		}
-
+		EndPaint(hwnd,&ps);
 	}
 	break;
+
 	case WM_CLOSE:
 		DestroyWindow(hwnd);
 		break;
@@ -132,7 +141,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	// 윈도우 생성
 	HWND hwnd = CreateWindow(
 		wc.lpszClassName,
-		TEXT("컴소 Application"),
+		TEXT("202007061 백종빈"),
 		WS_OVERLAPPEDWINDOW,
 		0, 0,
 		width, height,
