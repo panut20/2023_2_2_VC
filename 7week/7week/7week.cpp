@@ -4,14 +4,17 @@
 // 박스를 나타내는 변수
 bool rectwrite = false;
 bool triangle = false;
+bool Circle = false;
 POINT startPoint = { 0 };
 POINT endPoint = { 0 };
-POINT point1 = { 0 };
-POINT point2 = { 0 };
-POINT point3 = { 0 };
+POINT triangleVertices[3] = { {0, 0}, {0, 0}, {0, 0} };
 int isMouseLButtonPressed = 0;
 int isMouseRButtonPressed = 0;
+int checkrect = 0;
+int left, top, bottom, right;
 RECT rect = { 0 };
+
+bool PtInPolygon(POINT p);
 
 // 윈도우 프로시저
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -21,13 +24,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             // 첫 번째 버튼 클릭
             rectwrite = true;
             triangle = false;
-            InvalidateRect(hWnd, NULL, TRUE);
+            Circle = false;
+            InvalidateRect(hWnd, NULL, FALSE);
         }
         else if (LOWORD(wParam) == 2) {
             // 두 번째 버튼 클릭
-            triangle = true;
             rectwrite = false;
-            InvalidateRect(hWnd, NULL, TRUE);
+            triangle = true;
+            Circle = false;
+            InvalidateRect(hWnd, NULL, FALSE);
+        }
+        else if (LOWORD(wParam) == 3) {
+            // 두 번째 버튼 클릭
+            triangle = false;
+            rectwrite = false;
+            Circle = true;
+            InvalidateRect(hWnd, NULL, FALSE);
         }
         break;
 
@@ -38,13 +50,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             startPoint.x = LOWORD(lParam);
             startPoint.y = HIWORD(lParam);
             isMouseLButtonPressed = 1;
-            InvalidateRect(hWnd, NULL, TRUE);
+            InvalidateRect(hWnd, NULL, FALSE);
         }
         //삼각형
-        if (triangle)
+        else if (triangle)
         {
-            point1.x = LOWORD(lParam);
-            point1.y = HIWORD(lParam);
+            startPoint.x = LOWORD(lParam);
+            startPoint.y = HIWORD(lParam);
+            isMouseLButtonPressed = 1;
+            InvalidateRect(hWnd, NULL, TRUE);
+        }
+        //원
+        else if (Circle) {
+            startPoint.x = LOWORD(lParam);
+            startPoint.y = HIWORD(lParam);
             isMouseLButtonPressed = 1;
             InvalidateRect(hWnd, NULL, TRUE);
         }
@@ -59,12 +78,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                 endPoint.x = LOWORD(lParam);
                 endPoint.y = HIWORD(lParam);
                 isMouseLButtonPressed = 0;
-                InvalidateRect(hWnd, NULL, TRUE);
+                InvalidateRect(hWnd, NULL, FALSE);
             }
             //삼각형
-            if (triangle) 
+            else if (triangle) 
             {
-
+                triangleVertices[1].x = LOWORD(lParam);
+                triangleVertices[1].y = HIWORD(lParam);
+                triangleVertices[2].x = triangleVertices[0].x - (triangleVertices[1].x - triangleVertices[0].x);
+                triangleVertices[2].y = triangleVertices[1].y;
+                isMouseLButtonPressed = 0;
+                InvalidateRect(hWnd, NULL, TRUE);
+            }
+            //원
+            else if (Circle) 
+            {
+                endPoint.x = LOWORD(lParam);
+                endPoint.y = HIWORD(lParam);
+                left = min(startPoint.x, endPoint.x);
+                top = min(startPoint.y, endPoint.y);
+                right = max(startPoint.x, endPoint.x);
+                bottom = max(startPoint.y, endPoint.y);
+                isMouseLButtonPressed = 0;
+                InvalidateRect(hWnd, NULL, TRUE);
             }
         }
         break;
@@ -81,25 +117,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                 rect.right = max(startPoint.x, endPoint.x);
                 rect.bottom = max(startPoint.y, endPoint.y);
 
-                InvalidateRect(hWnd, NULL, TRUE);
+                InvalidateRect(hWnd, NULL, FALSE);
             }
             else if (triangle)
             {
-                HDC hdc = GetDC(hWnd);
-                point2.x = LOWORD(lParam);
-                point2.y = HIWORD(lParam);
+                triangleVertices[0].x = startPoint.x;
+                triangleVertices[0].y = startPoint.y;
 
-                point3.x = point1.x - (point2.x - point1.x);
-                point3.y = point2.y;
+                triangleVertices[1].x = LOWORD(lParam);
+                triangleVertices[1].y = HIWORD(lParam);
 
-                // 삼각형 그리기
-                POINT vertices[3] = { point1, point2, point3 };
-                Polygon(hdc, vertices, 3);
+                triangleVertices[2].x = triangleVertices[0].x - (triangleVertices[1].x - triangleVertices[0].x);
+                triangleVertices[2].y = triangleVertices[1].y;
 
                 InvalidateRect(hWnd, NULL, TRUE);
             }
+            else if (Circle) 
+            {
+                endPoint.x = LOWORD(lParam);
+                endPoint.y = HIWORD(lParam);
+                left = min(startPoint.x, endPoint.x);
+                top = min(startPoint.y, endPoint.y);
+                right = max(startPoint.x, endPoint.x);
+                bottom = max(startPoint.y, endPoint.y);
+                InvalidateRect(hWnd, NULL, TRUE);
+            }
         }
-        if (isMouseRButtonPressed && !IsRectEmpty(&rect)) {
+        if (isMouseRButtonPressed && checkrect && !IsRectEmpty(&rect)) {
             rect.left += LOWORD(lParam) - startPoint.x;
             rect.top += HIWORD(lParam) - startPoint.y;
             rect.right += LOWORD(lParam) - startPoint.x;
@@ -108,7 +152,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             startPoint.y = HIWORD(lParam);
             InvalidateRect(hWnd, NULL, TRUE);
         }
+        else if (isMouseRButtonPressed && PtInPolygon(triangleVertices[0])) {
+            triangleVertices[0].x += LOWORD(lParam) - startPoint.x;
+            triangleVertices[0].y += HIWORD(lParam) - startPoint.y;
+            triangleVertices[1].x += LOWORD(lParam) - startPoint.x;
+            triangleVertices[1].y += HIWORD(lParam) - startPoint.y;
+            triangleVertices[2].x += LOWORD(lParam) - startPoint.x;
+            triangleVertices[2].y = triangleVertices[1].y;
+            startPoint.x = LOWORD(lParam);
+            startPoint.y = HIWORD(lParam);
+            InvalidateRect(hWnd, NULL, TRUE);
+        }
         break;
+
     case WM_RBUTTONDOWN:
     {
         POINT mousePos;
@@ -119,6 +175,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             startPoint.x = LOWORD(lParam);
             startPoint.y = HIWORD(lParam);
             isMouseRButtonPressed = 1;
+            checkrect = 1;
+        }
+        else if (PtInPolygon(mousePos)) {
+            /*triangleVertices[0].x = LOWORD(lParam);
+            triangleVertices[0].y = HIWORD(lParam);*/
+            startPoint.x = LOWORD(lParam);
+            startPoint.y = HIWORD(lParam);
+            isMouseRButtonPressed = 1;
         }
         InvalidateRect(hWnd, NULL, TRUE);
     }
@@ -126,10 +190,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
     case WM_RBUTTONUP:
     {
-        endPoint.x = LOWORD(lParam);
-        endPoint.y = HIWORD(lParam);
-        isMouseRButtonPressed = 0;
-        InvalidateRect(hWnd, NULL, TRUE);
+        if (rectwrite) {
+            endPoint.x = LOWORD(lParam);
+            endPoint.y = HIWORD(lParam);
+            isMouseRButtonPressed = 0;
+            checkrect = 0;
+            InvalidateRect(hWnd, NULL, FALSE);
+        }
+        else if (triangle) {
+            /*triangleVertices[1].x = LOWORD(lParam);
+            triangleVertices[1].y = HIWORD(lParam);*/
+            isMouseRButtonPressed = 0;
+            InvalidateRect(hWnd, NULL, TRUE);
+        }
     }
     break;
 
@@ -138,12 +211,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
-        FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
-
+        
         if (rectwrite)
         {
             if (!IsRectEmpty(&rect))
             {
+                /*FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));*/
                 HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255));
                 FillRect(hdc, &rect, hBrush);
                 DeleteObject(hBrush);
@@ -151,19 +224,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         }
         else if (triangle)
         {
-            HDC hdc = GetDC(hWnd);
             HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 0));
             SelectObject(hdc, hBrush);
-
-            POINT vertices[3] = { point1, point2, point3 };
-            Polygon(hdc, vertices, 3);
-
+            // 삼각형 그리기
+            Polygon(hdc, triangleVertices, 3);
             DeleteObject(hBrush);
-            ReleaseDC(hWnd, hdc);
         }
-
+        else if (Circle) 
+        {
+            HBRUSH hBrush = CreateSolidBrush(RGB(0, 255, 0));
+            SelectObject(hdc, hBrush);
+            Chord(hdc, left, top, right, bottom, 0, 0, 0, 0); // 타원 그리기
+            DeleteObject(hBrush);
+        }
         EndPaint(hWnd, &ps);
-
     }
     break;
 
@@ -221,6 +295,10 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
         L"BUTTON", L"triangle", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
         20, 200, 200, 60, hWnd, (HMENU)2, hInstance, NULL);
 
+    hButton2 = CreateWindow(
+        L"BUTTON", L"Circle", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+        20, 400, 200, 60, hWnd, (HMENU)3, hInstance, NULL);
+
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
 
@@ -231,4 +309,14 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
     }
 
     return (int)msg.wParam;
+}
+
+bool PtInPolygon(POINT p) {
+    triangleVertices;
+    HRGN hRgn = CreatePolygonRgn(triangleVertices, 3, WINDING);
+
+    bool result = PtInRegion(hRgn, p.x, p.y);
+    DeleteObject(hRgn);
+
+    return result;
 }
