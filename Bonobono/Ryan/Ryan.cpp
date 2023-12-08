@@ -3,6 +3,7 @@
 #include "yuhanCG.h"
 
 int left, top, bottom, right;
+int circle_left, circle_top, circle_bottom, circle_right;
 int checkrect = 0;
 bool rectwrite = false;
 bool Circle = false;
@@ -141,10 +142,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         {
             endPoint.x = LOWORD(lParam);
             endPoint.y = HIWORD(lParam);
-            left = min(startPoint.x, endPoint.x);
-            top = min(startPoint.y, endPoint.y);
-            right = max(startPoint.x, endPoint.x);
-            bottom = max(startPoint.y, endPoint.y);
+            circle_left = min(startPoint.x, endPoint.x);
+            circle_top = min(startPoint.y, endPoint.y);
+            circle_right = max(startPoint.x, endPoint.x);
+            circle_bottom = max(startPoint.y, endPoint.y);
             isLbuttonPressed = 0;
             InvalidateRect(hWnd, NULL, FALSE);
         }
@@ -176,10 +177,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             else if (Circle) {
                 endPoint.x = LOWORD(lParam);
                 endPoint.y = HIWORD(lParam);
-                left = min(startPoint.x, endPoint.x);
-                top = min(startPoint.y, endPoint.y);
-                right = max(startPoint.x, endPoint.x);
-                bottom = max(startPoint.y, endPoint.y);
+                circle_left = min(startPoint.x, endPoint.x);
+                circle_top = min(startPoint.y, endPoint.y);
+                circle_right = max(startPoint.x, endPoint.x);
+                circle_bottom = max(startPoint.y, endPoint.y);
                 InvalidateRect(hWnd, NULL, FALSE);
             }
             else if (Ryan) {
@@ -245,16 +246,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
 
-        drawingarea(hWnd, hdc, drawRect, borderRect, text);
+        DrawingArea(hWnd, hdc, drawRect, borderRect, text);
         
         if(rectwrite){
             if (!IsRectEmpty(&rect))
             {
-                drawrect(hWnd, hdc, rect);
+                DrawRect(hWnd, hdc, rect);
             }
         }
         else if (Circle) {
-
+            DrawCircle(hWnd, hdc, circle_left, circle_top, circle_right, circle_bottom);
         }
         else if (Bonobono) {
             DrawBonobono(hWnd, hdc, isSpacePressed);
@@ -314,7 +315,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
     }
 
     hButton1 = CreateWindow(
-        L"BUTTON", L"Box", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+        L"BUTTON", L"Rect", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
         20, 20, 150, 64, hWnd, (HMENU)1, hInstance, NULL);
 
     hButton2 = CreateWindow(

@@ -176,14 +176,14 @@ void DrawRyan(HWND hWnd, HDC hdc, int left, int top, int right, int bottom) {
     DeleteObject(cheekBrush);
 }
 
-void drawrect(HWND hWnd, HDC hdc, RECT rect) {
+void DrawRect(HWND hWnd, HDC hdc, RECT rect) {
     /*FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));*/
     HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255));
     FillRect(hdc, &rect, hBrush);
     DeleteObject(hBrush);
 }
 
-void drawingarea(HWND hWnd, HDC hdc, RECT drawRect, RECT borderRect, const wchar_t* text) {
+void DrawingArea(HWND hWnd, HDC hdc, RECT drawRect, RECT borderRect, const wchar_t* text) {
     RECT clientRect;
     GetClientRect(hWnd, &clientRect);
     HBRUSH bgBrush = CreateSolidBrush(RGB(255, 240, 200));
@@ -226,4 +226,11 @@ void drawingarea(HWND hWnd, HDC hdc, RECT drawRect, RECT borderRect, const wchar
     borderRect.top = clientRect.top + drawRect.top;
     borderRect.right = clientRect.left + drawRect.right;
     borderRect.bottom = clientRect.top + drawRect.bottom;
+}
+
+void DrawCircle(HWND hWnd, HDC hdc, int circle_left, int circle_top, int circle_right, int circle_bottom) {
+    HBRUSH hBrush = CreateSolidBrush(RGB(0, 255, 0));
+    SelectObject(hdc, hBrush);
+    Chord(hdc, circle_left, circle_top, circle_right, circle_bottom, 0, 0, 0, 0); // 타원 그리기
+    DeleteObject(hBrush);
 }
