@@ -175,3 +175,55 @@ void DrawRyan(HWND hWnd, HDC hdc, int left, int top, int right, int bottom) {
     DeleteObject(noseBrush);
     DeleteObject(cheekBrush);
 }
+
+void drawrect(HWND hWnd, HDC hdc, RECT rect) {
+    /*FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));*/
+    HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255));
+    FillRect(hdc, &rect, hBrush);
+    DeleteObject(hBrush);
+}
+
+void drawingarea(HWND hWnd, HDC hdc, RECT drawRect, RECT borderRect, const wchar_t* text) {
+    RECT clientRect;
+    GetClientRect(hWnd, &clientRect);
+    HBRUSH bgBrush = CreateSolidBrush(RGB(255, 240, 200));
+    FillRect(hdc, &clientRect, bgBrush);
+    DeleteObject(bgBrush);
+
+    int margin = 8;
+    int padding = 8;
+
+    // Box의 좌표와 크기 계산
+    RECT outerRect = { margin, margin, 800 - margin, 480 - margin }; // Margin 적용
+    RECT innerRect = { outerRect.left + padding, outerRect.top + padding,
+                       outerRect.right - padding, outerRect.bottom - padding }; // Padding 적용
+    RECT outdrawRect = { 35 - 4,90 - 4 ,770 + 4,450 + 4 };
+
+    // Box 그리기
+    HBRUSH hOuterBrush = CreateSolidBrush(RGB(0, 0, 0)); // 바깥쪽 테두리의 색상
+    HBRUSH hInnerBrush = CreateSolidBrush(RGB(255, 240, 200));     // 안쪽 테두리의 색상
+    HBRUSH hOutBrush = CreateSolidBrush(RGB(80, 188, 223));
+
+    FillRect(hdc, &outerRect, hOuterBrush);
+    FillRect(hdc, &innerRect, hInnerBrush);
+    FillRect(hdc, &outdrawRect, hOutBrush);
+    FillRect(hdc, &drawRect, hInnerBrush);
+
+    DeleteObject(hOuterBrush);
+    DeleteObject(hInnerBrush);
+
+    SetBkMode(hdc, TRANSPARENT);
+    SetTextColor(hdc, RGB(0, 0, 0)); // 텍스트 색상을 검정색으로 설정
+    int textLength = lstrlen(text);
+    SIZE textSize;
+    GetTextExtentPoint32(hdc, text, textLength, &textSize);
+    int textX = (clientRect.right - clientRect.left - textSize.cx) / 2; // 텍스트의 가로 중앙 위치 계산
+    int textY = (clientRect.bottom - clientRect.top - textSize.cy) / 2; // 텍스트의 세로 중앙 위치 계산
+    TextOut(hdc, textX, textY, text, textLength);
+
+    // 드로잉 영역을 제외한 파란색 테두리 부분 계산
+    borderRect.left = clientRect.left + drawRect.left;
+    borderRect.top = clientRect.top + drawRect.top;
+    borderRect.right = clientRect.left + drawRect.right;
+    borderRect.bottom = clientRect.top + drawRect.bottom;
+}
