@@ -3,6 +3,7 @@
 #include "yuhanCG.h"
 
 int left, top, bottom, right;
+int checkrect = 0;
 bool rectwrite = false;
 bool Circle = false;
 bool Bonobono = false;
@@ -10,8 +11,11 @@ bool Ryan = false;
 bool Cube = false;
 bool isSpacePressed = false;
 bool isLbuttonPressed = false;
+bool isRbuttonPressed = false;
 bool isDrawingRyan = false;
 const wchar_t* text = L"드로잉 영역";
+RECT rect = { 0 };
+
 
 POINT startPoint = { 0 };
 POINT endPoint = { 0 };
@@ -105,7 +109,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         break;
 
     case WM_LBUTTONDOWN:
-        if (Ryan) {
+        if (rectwrite) {
+            startPoint.x = LOWORD(lParam);
+            startPoint.y = HIWORD(lParam);
+            isLbuttonPressed = true;
+            InvalidateRect(hWnd, NULL, FALSE);
+        }
+        else if (Circle) {
+            startPoint.x = LOWORD(lParam);
+            startPoint.y = HIWORD(lParam);
+            isLbuttonPressed = true;
+            InvalidateRect(hWnd, NULL, FALSE);
+        }
+        else if (Ryan) {
             startPoint.x = LOWORD(lParam);
             startPoint.y = HIWORD(lParam);
             isLbuttonPressed = true;
@@ -114,7 +130,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         break;
 
     case WM_LBUTTONUP:
-        if (Ryan) {
+        if (rectwrite)
+        {
+            endPoint.x = LOWORD(lParam);
+            endPoint.y = HIWORD(lParam);
+            isLbuttonPressed = 0;
+            InvalidateRect(hWnd, NULL, FALSE);
+        }
+        else if (Circle)
+        {
+            endPoint.x = LOWORD(lParam);
+            endPoint.y = HIWORD(lParam);
+            left = min(startPoint.x, endPoint.x);
+            top = min(startPoint.y, endPoint.y);
+            right = max(startPoint.x, endPoint.x);
+            bottom = max(startPoint.y, endPoint.y);
+            isLbuttonPressed = 0;
+            InvalidateRect(hWnd, NULL, FALSE);
+        }
+        else if (Ryan) {
             endPoint.x = LOWORD(lParam);
             endPoint.y = HIWORD(lParam);
             left = min(startPoint.x, endPoint.x);
@@ -129,7 +163,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
     case WM_MOUSEMOVE:
         if (isLbuttonPressed)
         {
-            if (Ryan) {
+            if (rectwrite) {
+                endPoint.x = LOWORD(lParam);
+                endPoint.y = HIWORD(lParam);
+                rect.left = min(startPoint.x, endPoint.x);
+                rect.top = min(startPoint.y, endPoint.y);
+                rect.right = max(startPoint.x, endPoint.x);
+                rect.bottom = max(startPoint.y, endPoint.y);
+
+                InvalidateRect(hWnd, NULL, FALSE);
+            }
+            else if (Circle) {
+                endPoint.x = LOWORD(lParam);
+                endPoint.y = HIWORD(lParam);
+                left = min(startPoint.x, endPoint.x);
+                top = min(startPoint.y, endPoint.y);
+                right = max(startPoint.x, endPoint.x);
+                bottom = max(startPoint.y, endPoint.y);
+                InvalidateRect(hWnd, NULL, FALSE);
+            }
+            else if (Ryan) {
                 endPoint.x = LOWORD(lParam);
                 endPoint.y = HIWORD(lParam);
                 left = min(startPoint.x, endPoint.x);
@@ -140,8 +193,50 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                 InvalidateRect(hWnd, NULL, FALSE);
             }
         }
+        if (isRbuttonPressed && checkrect && !IsRectEmpty(&rect)) {
+            rect.left += LOWORD(lParam) - startPoint.x;
+            rect.top += HIWORD(lParam) - startPoint.y;
+            rect.right += LOWORD(lParam) - startPoint.x;
+            rect.bottom += HIWORD(lParam) - startPoint.y;
+            startPoint.x = LOWORD(lParam);
+            startPoint.y = HIWORD(lParam);
+            InvalidateRect(hWnd, NULL, FALSE);
+        }
         break;
 
+    case WM_RBUTTONDOWN:
+    {
+        POINT mousePos;
+        mousePos.x = LOWORD(lParam);
+        mousePos.y = HIWORD(lParam);
+
+        if (PtInRect(&rect, mousePos)) {
+            startPoint.x = LOWORD(lParam);
+            startPoint.y = HIWORD(lParam);
+            isRbuttonPressed = 1;
+            checkrect = 1;
+        }
+        else if (Circle){
+
+        }
+        InvalidateRect(hWnd, NULL, FALSE);
+    }
+    break;
+
+    case WM_RBUTTONUP:
+    {
+        if (rectwrite) {
+            endPoint.x = LOWORD(lParam);
+            endPoint.y = HIWORD(lParam);
+            isRbuttonPressed = 0;
+            checkrect = 0;
+            InvalidateRect(hWnd, NULL, FALSE);
+        }
+        else if (Circle) {
+            
+        }
+    }
+    break;
 
 
     case WM_PAINT:
@@ -192,8 +287,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         borderRect.top = clientRect.top + drawRect.top;
         borderRect.right = clientRect.left + drawRect.right;
         borderRect.bottom = clientRect.top + drawRect.bottom;
+        
+        if(rectwrite){
+            if (!IsRectEmpty(&rect))
+            {
+                /*FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));*/
+                HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255));
+                FillRect(hdc, &rect, hBrush);
+                DeleteObject(hBrush);
+            }
+        }
+        else if (Circle) {
 
-        if (Bonobono) {
+        }
+        else if (Bonobono) {
             DrawBonobono(hWnd, hdc, isSpacePressed);
         }
         else if (Ryan) {
