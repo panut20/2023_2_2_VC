@@ -17,6 +17,8 @@ bool isDrawingRyan = false;
 const wchar_t* text = L"드로잉 영역";
 RECT rect = { 0 };
 
+bool PtInCircle(POINT p);
+
 
 POINT startPoint = { 0 };
 POINT endPoint = { 0 };
@@ -135,7 +137,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         {
             endPoint.x = LOWORD(lParam);
             endPoint.y = HIWORD(lParam);
-            isLbuttonPressed = 0;
+            isLbuttonPressed = FALSE;
             InvalidateRect(hWnd, NULL, FALSE);
         }
         else if (Circle)
@@ -146,7 +148,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             circle_top = min(startPoint.y, endPoint.y);
             circle_right = max(startPoint.x, endPoint.x);
             circle_bottom = max(startPoint.y, endPoint.y);
-            isLbuttonPressed = 0;
+            isLbuttonPressed = FALSE;
             InvalidateRect(hWnd, NULL, FALSE);
         }
         else if (Ryan) {
@@ -203,6 +205,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             startPoint.y = HIWORD(lParam);
             InvalidateRect(hWnd, NULL, FALSE);
         }
+        else if (isRbuttonPressed && Circle)
+        {
+            circle_left += LOWORD(lParam) - startPoint.x;
+            circle_top += HIWORD(lParam) - startPoint.y;
+            circle_right += LOWORD(lParam) - startPoint.x;
+            circle_bottom += HIWORD(lParam) - startPoint.y;
+            startPoint.x = LOWORD(lParam);
+            startPoint.y = HIWORD(lParam);
+            InvalidateRect(hWnd, NULL, FALSE);
+        }
         break;
 
     case WM_RBUTTONDOWN:
@@ -214,11 +226,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         if (PtInRect(&rect, mousePos)) {
             startPoint.x = LOWORD(lParam);
             startPoint.y = HIWORD(lParam);
-            isRbuttonPressed = 1;
+            isRbuttonPressed = TRUE;
             checkrect = 1;
         }
-        else if (Circle){
-
+        if (PtInCircle(mousePos)) {
+            startPoint.x = LOWORD(lParam);
+            startPoint.y = HIWORD(lParam);
+            isRbuttonPressed = TRUE;
         }
         InvalidateRect(hWnd, NULL, FALSE);
     }
@@ -229,13 +243,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         if (rectwrite) {
             endPoint.x = LOWORD(lParam);
             endPoint.y = HIWORD(lParam);
-            isRbuttonPressed = 0;
+            isRbuttonPressed = FALSE;
             checkrect = 0;
-            InvalidateRect(hWnd, NULL, FALSE);
         }
         else if (Circle) {
-            
+            endPoint.x = LOWORD(lParam);
+            endPoint.y = HIWORD(lParam);
+            isRbuttonPressed = FALSE;
         }
+        InvalidateRect(hWnd, NULL, FALSE);
     }
     break;
 
@@ -357,4 +373,15 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
     DeleteObject(wcex.hbrBackground);
 
     return (int)msg.wParam;
+}
+
+
+bool PtInCircle(POINT p)
+{
+    int centerX = (circle_left + circle_right) / 2;
+    int centerY = (circle_top + circle_bottom) / 2;
+    int radius = (circle_right - circle_left) / 2;
+
+    int distance = (p.x - centerX) * (p.x - centerX) + (p.y - centerY) * (p.y - centerY);
+    return (distance <= radius * radius);
 }
